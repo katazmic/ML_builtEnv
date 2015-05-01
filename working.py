@@ -5,57 +5,77 @@ import scipy as sp
 import sys
 
 
-from sklearn.svm import SVR
-from sklearn import svm
-from sklearn import linear_model
+import random
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+from sklearn import linear_model
+from sklearn import tree
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
+from sklearn import svm
 
+ 
 
 def GenX2data(X):
-    Gfname = 'generation%s.csv'%(X);
+    Gfname = '/Users/katyghantous/Desktop/MachineLearningResearch/generation%s.csv'%(X);
     with open(Gfname, 'rU') as f:
         reader = csv.reader(f)
-        Data = [['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']];
+        Data = [['0']];
         for row in reader:
             Data.append(row)
     
-
-    sizeD = np.size(Data)/np.size(Data[0]);  
-    for i in range(sizeD):
-        for j in range(np.size(Data[0])):
-            Data[i][j] = (float) (Data[i][j]);
-                
     Data = np.delete(Data,(0),axis=0)
+
+    sizeD = np.size(Data);  
+    for i in range(sizeD):
+        for j in range(np.size(Data[1])):
+            Data[i][j] = (float) (Data[i][j]);
+
+
 
     return Data
 
 
 def TestX2data(X):
-    Gfname = 'test%s.csv'%(X);
+    Gfname = '/Users/katyghantous/Desktop/MachineLearningResearch/test%s.csv'%(X);
     with open(Gfname, 'rU') as f:
         reader = csv.reader(f)
-        Data = [['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']];
+        Data = [['0']];
         for row in reader:
             Data.append(row)
                     
-
-    sizeD = np.size(Data)/np.size(Data[0]);  
+    Data = np.delete(Data,(0),axis=0)
+                
+    sizeD = np.size(Data);  
     for i in range(sizeD):
-        for j in range(np.size(Data[0])):
+        for j in range(np.size(Data[1])):
             Data[i][j] = (float) (Data[i][j]);
                 
-    Data = np.delete(Data,(0),axis=0)
+
     
     return Data
+
+#def AppendGeneration(Data,X):
+#    Gfname = 'generation%s.csv'%(X);
+#    with open(Gfname, 'rU') as f:
+#        reader = csv.reader(f)
+#        for row in reader:
+#            Data.append(row)
+#    
+#    
+#    sizeD = np.size(Data)/np.size(Data[0]);  
+#    for i in range(sizeD):
+#        for j in range(np.size(Data[0])):
+#            Data[i][j] = (float) (Data[i][j]);
+#    
+#    Data = np.delete(Data,(0),axis=0)
+#    
+#    return Data
 
 
 def GetInput(Data,indecis):
@@ -68,7 +88,7 @@ def GetInput(Data,indecis):
             print i
             sys.exit('one of your assumed indecis for input is out of bount!! impossiaable!');
     
-    Nx = np.size(Data)/np.size(Data[0]); 
+    Nx = np.size(Data);#/np.size(Data[0]); 
     Ny = (int) (NumInp);
     Inp = np.zeros((Nx,Ny))
     
@@ -90,9 +110,9 @@ def GetOutput(Data,indecis):
     for i in indecis:
         if i>(np.size(Data[0])):
             print i
-            sys.exit('one of yout assumed indecis of output is out of bount!! impossiaable!');
+            sys.exit('one of your assumed indecis of output is out of bount!! impossiaable!');
         
-    Nx = np.size(Data)/np.size(Data[0]); 
+    Nx = np.size(Data);#/np.size(Data[0]); 
     Ny = (int) (NumOut);
     Out = np.zeros((Nx,Ny))
 
@@ -111,18 +131,55 @@ def GetOutput(Data,indecis):
 
 ######## multisim :) 
 
-# lets look first at generation 0
-X = 0; 
+# lets look first at generation X
+X = 9; 
 
 # number of inputs 
-indecisInp = range(10);
-indexOut = [10];
+indecisInp = range(9);
+indexOut = [12];
 
 
 Data = GenX2data(X);
 
 Inp = GetInput(Data,indecisInp);
 Out1 = GetOutput(Data,indexOut);
+
+
+
+##
+Datatest = TestX2data(X);
+#
+Inp_test = GetInput(Datatest,indecisInp);
+Out1_test = GetOutput(Datatest,indexOut);
+
+##
+InpTr = zip(*Inp)
+InptestTr = zip(*Inp_test)
+##
+OutTr = zip(*Out1)
+OuttestTr = zip(*Out1_test)
+##
+
+for j in range(9):
+    for i in range(9):
+        line = plt.plot(np.sort(InpTr[j]),np.sort(InpTr[i])+100*i,'o-',np.sort(InptestTr[j]),np.sort(InptestTr[i])+100*i,'x-')
+        r = random.random()
+        b = random.random()
+        c = random.random()
+        plt.setp(line,color=[r,b,c])
+    plt.show()
+
+
+
+sys.exit('thats all folks!');
+
+##
+
+#plt.plot(OutTr)
+#plt.plot(OuttestTr)
+#plt.show()
+##
+
 
 #print 'computing svr...'
 
@@ -142,16 +199,31 @@ Out1 = GetOutput(Data,indexOut);
 
 
 
+####     desision tree works!
+
+#clf = tree.DecisionTreeRegressor()
+#clf.fit(Inp, Out1)
+
+##clf = svm.SVR()
+#print clf
+#clf.fit(Inp, Out1)
+
 
 
 clf = make_pipeline(PolynomialFeatures(4), Ridge())
-
-#clf = linear_model.Lasso(alpha = 0.1)
 clf.fit(Inp, Out1) 
 
-
+#print clf.named_steps['polynomialfeature'].coef_
 
 ##### Testing
+
+#Datatest = TestX2data(X);
+
+#Inp_test = GetInput(Datatest,indecisInp);
+#Out1_test = GetOutput(Datatest,indexOut);
+
+
+
 predres = np.ones(np.size(Out1));
 indx = 0;
 for tstinp in Inp:
@@ -159,17 +231,13 @@ for tstinp in Inp:
     indx = indx+1;
 
 
-plt.plot(predres,'r')
+plt.plot(predres,'or')
 plt.plot(Out1,'+r')
 plt.show()
 
 ##### Testing 
 
 
-Datatest = TestX2data(X);
-
-Inp_test = GetInput(Datatest,indecisInp);
-Out1_test = GetOutput(Datatest,indexOut);
 predres_test = np.ones(np.size(Out1_test));
 indx = 0;
 for tstinp in Inp_test:
@@ -177,72 +245,12 @@ for tstinp in Inp_test:
     indx = indx+1;
 
 
-plt.plot(predres_test,'b')
+plt.plot(predres_test,'ob')
 plt.plot(Out1_test,'+b')
 for i in range(np.size(predres_test)):
     print 'actual %s vs predicted %s'%(Out1_test[i],predres_test[i])
 
 
 plt.show()
-
-#tryX = 10;
-#pred = [clf.predict(Inp[tryX])];
-
-#print 'predicted value is %s' %(pred);
-#print 'actual value is %s' %(Out1[tryX]);
-
-
-#
-#    
-#Ysd = np.arange(1.,150.,1.)
-#Zsd = np.ones(np.size(Ysd))
-#for j in range(0,np.size(Ysd)):  
-#    Zsd[j] = calculateNormalizedWeight(10.,Ysd[j],shapeDictionary);
-#
-#Yin = [[Ysd[0],Ysd[0]]];
-#
-#for j in range(1,np.size(Ysd)):  
-#    Yin.append([Ysd[j],Ysd[j]])
-#
-#
-#clf = make_pipeline(PolynomialFeatures(4), Ridge())
-#
-##clf = linear_model.Lasso(alpha = 0.1)
-#clf.fit(Yin, Zsd) 
-#
-#
-#pred = [clf.predict(Yin[0])];
-#for i in range(1,np.size(Ysd)):
-#    pred.append(clf.predict(Yin[i]))
-#
-#plt.plot(Yin,pred,'-')
-#
-#
-#
-#Rtestini = [1, 10, 32, 12, 23, 100, 80, 95, 120, 140, 45, 56]; #150.0*np.random.rand(1,10)
-#
-#
-#Rtest = [[Rtestini[0],Rtestini[0]]];
-#
-#for j in range(1,np.size(Rtestini)):  
-#    Rtest.append([Rtestini[j],Rtestini[j]])
-#
-#
-#predR = [clf.predict(Rtest[0])];
-#for i in range(1,np.size(Rtest)):
-#    predR.append(clf.predict(Rtest[i]))
-#
-#
-#plt.plot(Rtest,predR,'o')
-#
-#plt.show()
-#
-#
-#
-#
-
-
-
-
 
 
